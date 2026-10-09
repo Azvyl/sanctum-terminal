@@ -1,0 +1,5 @@
+.env
+sanctum-terminal
+mc_stream_state.json
+locations_cache.json
+auth_cache

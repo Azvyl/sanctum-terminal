@@ -1,0 +1,405 @@
+{
+  "rules": {
+    "schale": {
+      "nodes": {
+        ".read": "auth != null",
+        ".indexOn": ["is_active", "last_seen", "role"],
+        "$node_id": {
+          ".write": "auth != null",
+          ".validate": "$node_id.length > 0 && $node_id.length <= 64",
+          
+          "node_id": {
+            ".validate": "newData.isString() && newData.val() === $node_id"
+          },
+          "is_active": {
+            ".validate": "newData.isBoolean()"
+          },
+          "device_name": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+          },
+          "role": {
+            ".validate": "newData.isString() && newData.val().length <= 64"
+          },
+          "os": {
+            ".validate": "newData.isString() && (newData.val() === 'linux' || newData.val() === 'windows' || newData.val() === 'darwin' || newData.val() === 'android')"
+          },
+          "enabled_services": {
+            ".validate": "newData.hasChildren() || newData.isString() || newData.val() === null"
+          },
+          "connected_at": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "last_seen": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "is_failover_active": {
+            ".validate": "newData.isBoolean()"
+          },
+          "$other": {
+            ".validate": true
+          }
+        }
+      },
+
+      "telemetry": {
+        ".read": "auth != null",
+        ".indexOn": ["timestamp", "node_id"],
+        "$node_id": {
+          ".write": "auth != null",
+          ".validate": "$node_id.length > 0 && $node_id.length <= 64 && newData.hasChildren(['cpu_load', 'cpu_speed_ghz', 'ram_used_gb', 'ram_total_gb', 'gpu_load', 'gpu_name', 'battery_power_w', 'disk_used_gb', 'disk_total_gb', 'temp_c', 'uptime_ms', 'timestamp'])",
+          
+          "cpu_load": {
+            ".validate": "newData.isNumber() && (newData.val() >= -1 && newData.val() <= 100)"
+          },
+          "cpu_speed_ghz": {
+            ".validate": "newData.isNumber() && (newData.val() >= -1 && newData.val() <= 10)"
+          },
+          "ram_used_gb": {
+            ".validate": "newData.isNumber() && newData.val() >= -1"
+          },
+          "ram_total_gb": {
+            ".validate": "newData.isNumber() && newData.val() >= -1"
+          },
+          "gpu_load": {
+            ".validate": "newData.isNumber() && (newData.val() >= -1 && newData.val() <= 100)"
+          },
+          "gpu_name": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
+          "battery_power_w": {
+            ".validate": "newData.isNumber()"
+          },
+          "disk_used_gb": {
+            ".validate": "newData.isNumber() && newData.val() >= -1"
+          },
+          "disk_total_gb": {
+            ".validate": "newData.isNumber() && newData.val() >= -1"
+          },
+          "temp_c": {
+            ".validate": "newData.isNumber() && newData.val() >= -1 && newData.val() <= 150"
+          },
+          "uptime_ms": {
+            ".validate": "newData.isNumber() && newData.val() >= -1"
+          },
+          "timestamp": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "node_id": {
+            ".validate": "newData.isString() && newData.val() === $node_id"
+          },
+          "device_name": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
+          "os": {
+            ".validate": "newData.isString()"
+          },
+          "device_role": {
+            ".validate": "newData.isString() && newData.val().length <= 64"
+          },
+          "$other": {
+            ".validate": true
+          }
+        }
+      },
+
+      "service_election": {
+        ".read": "auth != null",
+        ".indexOn": ["current_leader", "last_heartbeat"],
+        "$service_name": {
+          ".write": "auth != null",
+          ".validate": "($service_name === 'discord_bot' || $service_name === 'discord_widgets' || $service_name === 'stream_bridge') && newData.hasChildren(['last_heartbeat'])",
+          
+          "current_leader": {
+            ".validate": "newData.val() === null || (newData.isString() && newData.val().length > 0 && newData.val().length <= 64)"
+          },
+          "claimed_at": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "last_heartbeat": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "released_by": {
+            ".validate": "newData.val() === null || (newData.isString() && newData.val().length <= 64)"
+          },
+          "$other": {
+            ".validate": true
+          }
+        }
+      },
+
+      "rate_limits": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".indexOn": ["reset_at", "locked_by", "updated_at"],
+        "$app_id": {
+          ".validate": "newData.hasChildren(['app_id', 'widget_name', 'reset_at', 'locked_by', 'updated_at'])",
+          
+          "app_id": {
+            ".validate": "newData.isString() && newData.val() === $app_id"
+          },
+          "widget_name": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
+          "reset_at": {
+            ".validate": "newData.isNumber()"
+          },
+          "locked_by": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64"
+          },
+          "updated_at": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$other": {
+            ".validate": true
+          }
+        }
+      },
+
+      "states": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "bot_tracker": {
+          ".validate": "newData.hasChildren(['lastBedrockVersion', 'lastJavaVersion', 'lastGempaId'])",
+          "lastBedrockVersion": {
+            ".validate": "newData.isString()"
+          },
+          "lastJavaVersion": {
+            ".validate": "newData.isString()"
+          },
+          "lastGempaId": {
+            ".validate": "newData.isString()"
+          },
+          "recentGempas": {
+            "$gempa_id": {
+              "threadId": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "messageId": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "createdAt": {
+                ".validate": "newData.val() === null || newData.isNumber()"
+              },
+              "dataHash": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "title": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "magnitudo": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "kedalaman": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "koordinat": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "wilayah": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "momentTensor": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "$other": {
+                ".validate": true
+              }
+            },
+            "$other": {
+              ".validate": true
+            }
+          },
+          "$other": {
+            ".validate": true
+          }
+        },
+
+        "ai_phase": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+
+        "stream_integration": {
+          "activePostId": {
+            ".validate": "newData.val() === null || newData.isString()"
+          },
+          "activePostTitle": {
+            ".validate": "newData.val() === null || newData.isString()"
+          },
+          "updatedAt": {
+            ".validate": "newData.val() === null || (newData.isNumber() && newData.val() <= now)"
+          },
+          "$other": {
+            ".validate": true
+          }
+        },
+
+        "weather_tracker": {
+          "potensiEkstremThreadId": {
+            ".validate": "newData.val() === null || newData.isString()"
+          },
+          "potensiEkstremMessageId": {
+            ".validate": "newData.val() === null || newData.isString()"
+          },
+          "potensiEkstremLastHash": {
+            ".validate": "newData.val() === null || newData.isString()"
+          },
+          "gelombangTinggiThreadId": {
+            ".validate": "newData.val() === null || newData.isString()"
+          },
+          "gelombangTinggiMessageId": {
+            ".validate": "newData.val() === null || newData.isString()"
+          },
+          "gelombangTinggiLastHash": {
+            ".validate": "newData.val() === null || newData.isString()"
+          },
+          "peringatanDiniThreads": {
+            "$prov_kode": {
+              "threadId": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "messageId": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "lastHash": {
+                ".validate": "newData.val() === null || newData.isString()"
+              },
+              "expiredAt": {
+                ".validate": "newData.val() === null || newData.isNumber()"
+              },
+              "$other": {
+                ".validate": true
+              }
+            }
+          },
+          "$other": {
+            ".validate": true
+          }
+        },
+        "$other": {
+          ".validate": true
+        }
+      },
+
+      "widget_data": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "sensei_id": {
+          "name": { ".validate": "newData.isString()" },
+          "name_short": { ".validate": "newData.isString()" },
+          "region": { ".validate": "newData.isString()" },
+          "friend_code": { ".validate": "newData.isString()" },
+          "uid": { ".validate": "newData.isString()" },
+          "friends": { ".validate": "newData.isString()" },
+          "tactical_challenge_participation": { ".validate": "newData.isString() || newData.isNumber()" },
+          "total_assault_entries": { ".validate": "newData.isString() || newData.isNumber()" },
+          "stage_clears_total": { ".validate": "newData.isString() || newData.isNumber()" },
+          "commission_clears": { ".validate": "newData.isString() || newData.isNumber()" },
+          "bounty_clears": { ".validate": "newData.isString() || newData.isNumber()" },
+          "scrimmage_clears": { ".validate": "newData.isString() || newData.isNumber()" },
+          "ap": { ".validate": "newData.isString()" },
+          "credits": { ".validate": "newData.isString() || newData.isNumber()" },
+          "pyroxenes": { ".validate": "newData.isString() || newData.isNumber()" },
+          "credits_earned": { ".validate": "newData.isString() || newData.isNumber()" },
+          "credits_spent": { ".validate": "newData.isString() || newData.isNumber()" },
+          "daily_login": { ".validate": "newData.isString() || newData.isNumber()" },
+          "craft_completed": { ".validate": "newData.isString() || newData.isNumber()" },
+          "session": {
+            "total_assault_rank": { ".validate": "newData.isString() || newData.isNumber()" },
+            "grandAssault_rank": { ".validate": "newData.isString() || newData.isNumber()" },
+            "tactical_challenge_rank": { ".validate": "newData.isString() || newData.isNumber()" },
+            "final_restriction_stage": { ".validate": "newData.isString()" }
+          },
+          "mission": {
+            "normal": { ".validate": "newData.isString()" },
+            "hard": { ".validate": "newData.isString()" },
+            "total_stars": { ".validate": "newData.isString() || newData.isNumber()" }
+          },
+          "club": {
+            "name": { ".validate": "newData.isString()" },
+            "id": { ".validate": "newData.isString() || newData.isNumber()" },
+            "members": { ".validate": "newData.isString()" }
+          },
+          "lesson": {
+            "area_rank": { ".validate": "newData.isString() || newData.isNumber()" }
+          },
+          "collection": {
+            "students": { ".validate": "newData.isString() || newData.isNumber()" },
+            "student_level_ups": { ".validate": "newData.isString() || newData.isNumber()" },
+            "skill_level_ups": { ".validate": "newData.isString() || newData.isNumber()" },
+            "skill_lv5_count": { ".validate": "newData.isString() || newData.isNumber()" },
+            "skill_lv10_count": { ".validate": "newData.isString() || newData.isNumber()" },
+            "students_recruited": { ".validate": "newData.isString() || newData.isNumber()" },
+            "students_3star": { ".validate": "newData.isString() || newData.isNumber()" },
+            "students_5star": { ".validate": "newData.isString() || newData.isNumber()" },
+            "talents_unlocked": { ".validate": "newData.isString() || newData.isNumber()" },
+            "recollection_lobbies": { ".validate": "newData.isString() || newData.isNumber()" }
+          },
+          "weapon": {
+            "equipped": { ".validate": "newData.isString() || newData.isNumber()" },
+            "level_ups": { ".validate": "newData.isString() || newData.isNumber()" },
+            "lv30": { ".validate": "newData.isString() || newData.isNumber()" },
+            "lv40": { ".validate": "newData.isString() || newData.isNumber()" },
+            "lv50": { ".validate": "newData.isString() || newData.isNumber()" },
+            "lv60": { ".validate": "newData.isString() || newData.isNumber()" }
+          }
+        },
+        "minecraft": {
+          ".validate": "newData.hasChildren(['profile', 'pc', 'android', 'marketplace'])",
+          "profile": {
+            "gamertag": { ".validate": "newData.isString()" },
+            "java_name": { ".validate": "newData.isString()" },
+            "friends": { ".validate": "newData.isNumber() || newData.isString()" },
+            "followers": { ".validate": "newData.isNumber() || newData.isString()" }
+          },
+          "pc": {
+            "playtime_formatted": { ".validate": "newData.isString()" },
+            "playtime_hours": { ".validate": "newData.isNumber() || newData.isString()" },
+            "blocks_broken": { ".validate": "newData.isNumber() || newData.isString()" },
+            "mobs_defeated": { ".validate": "newData.isNumber() || newData.isString()" },
+            "distance_traveled": { ".validate": "newData.isNumber() || newData.isString()" },
+            "achievements_completed": { ".validate": "newData.isNumber() || newData.isString()" },
+            "achievements_total": { ".validate": "newData.isNumber() || newData.isString()" },
+            "achievements_percentage": { ".validate": "newData.isNumber() || newData.isString()" },
+            "achievements_in_progress": { ".validate": "newData.isNumber() || newData.isString()" },
+            "gamerscore": { ".validate": "newData.isNumber() || newData.isString()" },
+            "gamerscore_total": { ".validate": "newData.isNumber() || newData.isString()" }
+          },
+          "android": {
+            "playtime_formatted": { ".validate": "newData.isString()" },
+            "playtime_hours": { ".validate": "newData.isNumber() || newData.isString()" },
+            "blocks_broken": { ".validate": "newData.isNumber() || newData.isString()" },
+            "mobs_defeated": { ".validate": "newData.isNumber() || newData.isString()" },
+            "distance_traveled": { ".validate": "newData.isNumber() || newData.isString()" },
+            "achievements_completed": { ".validate": "newData.isNumber() || newData.isString()" },
+            "achievements_total": { ".validate": "newData.isNumber() || newData.isString()" },
+            "achievements_percentage": { ".validate": "newData.isNumber() || newData.isString()" },
+            "achievements_in_progress": { ".validate": "newData.isNumber() || newData.isString()" },
+            "gamerscore": { ".validate": "newData.isNumber() || newData.isString()" },
+            "gamerscore_total": { ".validate": "newData.isNumber() || newData.isString()" }
+          },
+          "marketplace": {
+            "minecoins": { ".validate": "newData.isNumber() || newData.isString()" },
+            "owned_total": { ".validate": "newData.isNumber() || newData.isString()" },
+            "addons": { ".validate": "newData.isNumber() || newData.isString()" },
+            "skins": { ".validate": "newData.isNumber() || newData.isString()" },
+            "worlds": { ".validate": "newData.isNumber() || newData.isString()" },
+            "textures": { ".validate": "newData.isNumber() || newData.isString()" },
+            "mashups": { ".validate": "newData.isNumber() || newData.isString()" },
+            "passes": { ".validate": "newData.isNumber() || newData.isString()" },
+            "wishlist": { ".validate": "newData.isNumber() || newData.isString()" }
+          }
+        },
+        "github": {
+          ".validate": "newData.hasChildren(['profile', 'metrics', 'contributed_to']) || newData.hasChildren(['data'])"
+        },
+        "$custom_widget": {
+          ".validate": "newData.isString() || newData.hasChildren()"
+        }
+      },
+
+      "$other": {
+        ".validate": true
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "sanctum-terminal",
+  "version": "2.0.0",
+  "exports": "./main.ts",
+  "unstable": ["net"],
+  "tasks": {
+    "start": "deno run --env --allow-all --unstable-net main.ts",
+    "dev": "deno run --env --allow-all --unstable-net --watch main.ts",
+    "test": "deno test --allow-all tests/",
+    "sync:github": "deno run --env --allow-all scripts/sync_github.ts"
+  },
+  "imports": {
+    "firebase/app": "npm:firebase@12.16.0/app",
+    "firebase/database": "npm:firebase@12.16.0/database",
+    "firebase/auth": "npm:firebase@12.16.0/auth",
+    "discord.js": "npm:discord.js@14.26.5",
+    "node-html-parser": "npm:node-html-parser@9.0.0",
+    "deno-dom": "https://deno.land/x/deno_dom@v0.1.48/deno-dom-wasm.ts",
+    "express": "npm:express@4.21.2",
+    "ws": "npm:ws@8.18.0",
+    "uuid": "npm:uuid@11.0.5",
+    "prismarine-auth": "npm:prismarine-auth@2.5.0"
+  }
+}
